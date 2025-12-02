@@ -29,3 +29,5 @@ data/
 processed_data/
     car/
     bus/
+
+https://www.geeksforgeeks.org/nlp/mel-frequency-cepstral-coefficients-mfcc-for-speech-recognition/
