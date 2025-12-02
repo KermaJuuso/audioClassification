@@ -1,5 +1,4 @@
 
-
 ## For a simple model like Logistic Regression, SVM, RandomForest, these are typically sufficient:
 1. MFCCs
 The single most important feature.
@@ -19,3 +18,14 @@ Useful, but MFCCs and spectral centroid already carry similar information.
 Needed only if:
 you plan to use a CNN or
 you want image-based classification
+
+
+### Audio filuja sen verra paljo nii ei tuu tänne githubi
+data/
+    bus/
+        bus001.wav
+        jne...
+    car/
+processed_data/
+    car/
+    bus/
