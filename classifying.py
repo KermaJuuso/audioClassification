@@ -75,7 +75,7 @@ if __name__ == "__main__":
         print(f'  test time:   {np.average(stats[name]["test_times"]) * 1000:3.0f} ms')
         print()
 
-    ## CNN classifier for comparison (requires torch, torchaudio, and ffmpeg installed in environment/interpreter)
+    ## CNN classifier for comparison (requires some environment setup (check readme))
     # CNNclassifier = CNNClassifier()
     # start = time.time()
     l, a, p, r = 0.626, 0.9117, 1.0, 0.8571  #  CNNclassifier.eval()  # example values (that I got) in case the environment is not set
