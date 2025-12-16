@@ -19,7 +19,7 @@ path = "processed_data"
 
 # A helper class to load the audio data
 # Assumes that training data is under path/train, testing data under path/test
-# Both are devided into car_wav and tram_wav directories that have the wav files
+# Both are devided into car and tram directories that have the wav files
 class DataGenerator(Dataset):
     def __init__(self, mode, verbose=False):
         super(DataGenerator, self).__init__()
@@ -28,8 +28,8 @@ class DataGenerator(Dataset):
         self.sampling_rate = 16000
         self.samples_per_file = int(self.duration_per_file_in_s * self.sampling_rate)
 
-        self.car_files = glob.glob(os.path.join(path, mode, 'car_wav', '*.wav'))
-        self.tram_files = glob.glob(os.path.join(path, mode, 'tram_wav', '*.wav'))
+        self.car_files = glob.glob(os.path.join(path, mode, 'car', '*.wav'))
+        self.tram_files = glob.glob(os.path.join(path, mode, 'tram', '*.wav'))
         if verbose: print(mode, "cars:", len(self.car_files))
         if verbose: print(mode, "trams:", len(self.tram_files))
         if verbose: print()
@@ -44,6 +44,7 @@ class DataGenerator(Dataset):
 
         audio_data, sr = torchaudio.load(file_path)  # returns a tensor with shape [channels, samples]
 
+        # Truncate/pad all the samples to 5 seconds
         if audio_data.size(1) > self.samples_per_file:
             audio_data = audio_data[:, :self.samples_per_file]  # Truncate
         else:
