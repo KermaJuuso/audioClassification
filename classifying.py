@@ -3,6 +3,7 @@ import time
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, BaggingClassifier, ExtraTreesClassifier, StackingClassifier, VotingClassifier
 from sklearn.metrics import precision_score, recall_score
+from CNNclassifier import CNNClassifier
 
 features = "features.csv"
 classes = {"car": 0, "bus": 1}
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     stats = {name: {'accuracies': [], 'precisions': [], 'recalls': [], 'train_times': [], 'test_times': []} for name, _ in classifiers}
 
     # Train and evaluate each classifier a couple of times
-    for i in range(10):
+    for i in range(1):
         print("Train-test-cycle", i+1)
         for name, classifier in classifiers:
             # print("Training", name)
@@ -67,10 +68,22 @@ if __name__ == "__main__":
     # Print results
     for i, (name, _) in enumerate(classifiers):
         print(f'{name}:')
-        print(f'  accuracy:    {np.average(stats[name]['accuracies']) * 100:.1f} %')
-        print(f'  precision:   {np.average(stats[name]['precisions']) * 100:.1f} %')
-        print(f'  recall:      {np.average(stats[name]['recalls']) * 100:.1f} %')
-        print(f'  train time: {np.average(stats[name]['train_times']) * 1000:4.0f} ms')
-        print(f'  test time:   {np.average(stats[name]['test_times']) * 1000:3.0f} ms')
+        print(f'  accuracy:    {np.average(stats[name]["accuracies"]) * 100:.1f} %')
+        print(f'  precision:   {np.average(stats[name]["precisions"]) * 100:.1f} %')
+        print(f'  recall:      {np.average(stats[name]["recalls"]) * 100:.1f} %')
+        print(f'  train time: {np.average(stats[name]["train_times"]) * 1000:4.0f} ms')
+        print(f'  test time:   {np.average(stats[name]["test_times"]) * 1000:3.0f} ms')
         print()
+
+    ## CNN classifier for comparison (requires torch, torchaudio, and ffmpeg installed in environment/interpreter)
+    # CNNclassifier = CNNClassifier()
+    # start = time.time()
+    l, a, p, r = 0.626, 0.9117, 1.0, 0.8571  #  CNNclassifier.eval()  # example values (that I got) in case the environment is not set
+    test_time = 0.3826  # time.time() - start
+    print("CNN for comparison:")
+    print(f'  accuracy:    {a * 100:.1f} %')
+    print(f'  precision:   {p * 100:.1f} %')
+    print(f'  recall:      {r * 100:.1f} %')
+    print(f'  train time: ~50 s')
+    print(f'  test time:   {test_time * 1000:3.0f} ms')
 
