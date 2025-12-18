@@ -5,50 +5,47 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Bagging
 from sklearn.metrics import precision_score, recall_score
 from CNNclassifier import CNNClassifier
 
-features = "features.csv"
-classes = {"car": 0, "bus": 1}
+train_features = "train_features.csv"
+test_features = "test_features.csv"
 
 # Separate the features from the labels
-def read_data():
-    with open(features, "r") as csvfile:
+def read_features(feature_file, cls_coding):
+    with open(feature_file, "r") as csvfile:
         csvreader = csv.reader(csvfile, delimiter=",")
         next(csvreader, None)  # skip header
         labels = []
         feats = []
         for row in csvreader:
-            labels.append(classes[row[1]])
+            labels.append(cls_coding[row[1]])
             feats.append(row[2:])
 
     # Convert to numpy
     labels = np.array(labels)
     feats = np.array(feats, dtype=np.float32)
 
-    # Shuffle
-    perm = np.random.permutation(feats.shape[0])
-    labels = labels[perm]
-    feats = feats[perm]
-
-    # Divide to train and test (somehow different in final version)
-    div = len(labels) // 5  # 1/5 = 20% for testing
-
-    return labels[:div], labels[div:], feats[:div], feats[div:]
+    return labels, feats
 
 
-if __name__ == "__main__":
-    test_lb, train_lb, test_ft, train_ft = read_data()
+def classify(classes=("car", "tram")):
+    # Load data
+    cls_coding = {c: i for i, c in enumerate(classes)}
+    train_lb, train_ft = read_features(train_features, cls_coding)
+    test_lb, test_ft = read_features(test_features, cls_coding)
 
     # Define classifiers
-    single_classifiers = [("Random Forest", RandomForestClassifier()) , ("Ada Boost", AdaBoostClassifier()),
-                   ("Bagging", BaggingClassifier()), ("Extra Trees", ExtraTreesClassifier())]
+    single_classifiers = [("Random Forest", RandomForestClassifier()), ("AdaBoost", AdaBoostClassifier()),
+                          ("Bagging", BaggingClassifier()), ("Extra Trees", ExtraTreesClassifier())]
 
-    classifiers = single_classifiers + [("Stacking", StackingClassifier(single_classifiers)), ("Voting", VotingClassifier(single_classifiers))]
+    classifiers = single_classifiers + [("Stacking", StackingClassifier(single_classifiers)),
+                                        ("Voting", VotingClassifier(single_classifiers))]
 
     # Collect some statistics about the performance of the classifiers
-    stats = {name: {'accuracies': [], 'precisions': [], 'recalls': [], 'train_times': [], 'test_times': []} for name, _ in classifiers}
+    stats = {name: {'accuracies': [], 'precisions': [], 'recalls': [], 'train_times': [], 'test_times': []} for name, _
+             in classifiers}
 
     # Train and evaluate each classifier a couple of times
-    for i in range(1):
-        print("Train-test-cycle", i+1)
+    for i in range(100):
+        print("Train-test-cycle", i + 1)
         for name, classifier in classifiers:
             # print("Training", name)
             start = time.time()
@@ -76,10 +73,10 @@ if __name__ == "__main__":
         print()
 
     ## CNN classifier for comparison (requires some environment setup (check readme))
-    # CNNclassifier = CNNClassifier()
-    # start = time.time()
-    l, a, p, r = 0.626, 0.9117, 1.0, 0.8571  #  CNNclassifier.eval()  # example values (that I got) in case the environment is not set
-    test_time = 0.3826  # time.time() - start
+    CNNclassifier = CNNClassifier()
+    start = time.time()
+    l, a, p, r = CNNclassifier.eval()
+    test_time = time.time() - start
     print("CNN for comparison:")
     print(f'  accuracy:    {a * 100:.1f} %')
     print(f'  precision:   {p * 100:.1f} %')
@@ -87,3 +84,6 @@ if __name__ == "__main__":
     print(f'  train time: ~50 s')
     print(f'  test time:   {test_time * 1000:3.0f} ms')
 
+
+if __name__ == "__main__":
+    classify()

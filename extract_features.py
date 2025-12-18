@@ -83,4 +83,4 @@ def extract_features(modes=("train", "test"), classes=("car", "tram")):
 
 
 if __name__ == "__main__":
-    extract_features(modes=("train", "test"), classes=("car", "tram"))
+    extract_features()

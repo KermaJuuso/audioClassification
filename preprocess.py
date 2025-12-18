@@ -23,7 +23,7 @@ def get_wavs(path):
     source_wavs = list(map(lambda x: os.path.join(path, x) + ".wav", wav_files))
 
     # Convert non_wav files that don't have wav alternatives
-    for name, ext in {n:e for n,e in non_wavs if n not in wav_files}:
+    for name, ext in {n:e for n,e in non_wavs.items() if n not in wav_files}:
         base = os.path.join(path, name)
         nonwav_path = base + ext
         wav_path = base + ".wav"
