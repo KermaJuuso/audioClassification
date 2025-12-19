@@ -79,7 +79,7 @@ def extract_features(modes=("train", "test"), classes=("car", "tram")):
         for c in classes:
             rows += extract_all(os.path.join(source_path, mode, c), label=c)
         df = pd.DataFrame(data=rows)
-        df.to_csv(f'{mode}_features.csv', index=False)
+        df.to_csv(f'{mode}_features_new.csv', index=False)
 
 
 if __name__ == "__main__":

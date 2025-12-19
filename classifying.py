@@ -6,7 +6,7 @@ from sklearn.metrics import precision_score, recall_score
 from CNNclassifier import CNNClassifier
 
 train_features = "train_features.csv"
-test_features = "test_features.csv"
+test_features = "test_features_new.csv"
 
 # Separate the features from the labels
 def read_features(feature_file, cls_coding):
@@ -71,7 +71,7 @@ def classify(classes=("car", "tram")):
         print(f'  train time: {np.average(stats[name]["train_times"]) * 1000:4.0f} ms')
         print(f'  test time:   {np.average(stats[name]["test_times"]) * 1000:3.0f} ms')
         print()
-
+"""
     ## CNN classifier for comparison (requires some environment setup (check readme))
     CNNclassifier = CNNClassifier()
     start = time.time()
@@ -84,6 +84,6 @@ def classify(classes=("car", "tram")):
     print(f'  train time: ~50 s')
     print(f'  test time:   {test_time * 1000:3.0f} ms')
 
-
+"""
 if __name__ == "__main__":
     classify()
