@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Bagging
 from sklearn.metrics import precision_score, recall_score
 from CNNclassifier import CNNClassifier
 from sklearn.model_selection import train_test_split
+import joblib
 
 
 train_features = "train_features.csv"
@@ -87,6 +88,10 @@ def classify(classes=("car", "tram")):
         print(f"  precision: {precision_score(test_lb, preds) * 100:.1f} %")
         print(f"  recall:    {recall_score(test_lb, preds) * 100:.1f} %")
         print()
+
+    # Save random forest for demo
+    #rf = dict(classifiers)["Random Forest"]
+    #joblib.dump(rf, "random_forest_model.joblib")
 """
     ## CNN classifier for comparison (requires some environment setup (check readme))
     CNNclassifier = CNNClassifier()
