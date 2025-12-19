@@ -15,7 +15,7 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
-path = "processed_data"
+path = "../processed_data"
 
 # A helper class to load the audio data
 # Assumes that training data is under path/train, testing data under path/test
@@ -116,8 +116,10 @@ class CNNClassifier:
 
         # Loading the data
         train_data = DataGenerator(mode='train')
+        valid_data = DataGenerator(mode='validation')
         test_data = DataGenerator(mode='test')
         self.train_dataloader = DataLoader(train_data, batch_size=8, pin_memory=True, shuffle=True)
+        self.valid_dataloader = DataLoader(valid_data, batch_size=8, pin_memory=True, shuffle=True)
         self.test_dataloader = DataLoader(test_data, batch_size=8, pin_memory=True, shuffle=True)
 
         # Creating the model
@@ -164,17 +166,16 @@ class CNNClassifier:
             # Calculate, print, and log accuracies and losses
             train_loss = total_loss / (i+1)  # i+1 = num of bathces
             train_acc = correct_predictions / len(self.train_dataloader.dataset)
-            test_loss, test_acc, _, _ = self.eval()
-            if verbose: print(f'Epoch {epoch}, train_loss {train_loss:.2f}, train_acc {train_acc:.4f}, test_loss {test_loss:.2f}, test_acc {test_acc:.4f}, epoch time {time.time() - start:.2f} s')
+            test_loss, test_acc, _, _ = self.eval(True)
+            if verbose: print(f'Epoch {epoch:2}, train_loss {train_loss:.2f}, train_acc {train_acc:.4f}, test_loss {test_loss:.2f}, test_acc {test_acc:.4f}, epoch time {time.time() - start:.2f} s')
             train_losses.append(train_loss)
             train_accs.append(train_acc)
             val_losses.append(test_loss)
             val_accs.append(test_acc)
 
-            if test_acc > threshold:  # The model is good enough
+            if test_acc > threshold and test_acc >= max(val_accs):  # The model is good enough
                 torch.save(self.model.state_dict(), 'CNNclassifier.pth')
                 if verbose: print("Your trained model is saved successfully!")
-                break
 
         if graphs:
             epochs = range(len(train_losses))  # num of executed epochs
@@ -195,14 +196,15 @@ class CNNClassifier:
 
     # Evaluating (took ~0.38s for whole test-set)
     # returns the loss, accuracy, precision, and recall on the test material
-    def eval(self):
+    def eval(self, validation=False):
+        dataloader = self.valid_dataloader if validation else self.test_dataloader
         self.model.eval()
         with (torch.no_grad()):
             total_loss = 0.
-            preds = torch.zeros(len(self.test_dataloader.dataset)).to(self.device)
-            targets = torch.zeros(len(self.test_dataloader.dataset)).to(self.device)
+            preds = torch.zeros(len(dataloader.dataset)).to(self.device)
+            targets = torch.zeros(len(dataloader.dataset)).to(self.device)
             n = 0
-            for i, (input_batch, target_batch) in enumerate(self.test_dataloader):
+            for i, (input_batch, target_batch) in enumerate(dataloader):
                 input_batch = input_batch.to(self.device)
                 target_batch = target_batch.float().to(self.device)
 
@@ -227,5 +229,8 @@ class CNNClassifier:
 
 if __name__ == '__main__':
     classifier = CNNClassifier()
+    start = time.time()
+    classifier.fit(epochs=10, verbose=True, graphs=True)
+    train = time.time()
     l, a, p, r = classifier.eval()
-    print("Loss:", l, ", Accuracy:", a, ", Precision:", p, ", Recall:", r)
+    print(F'Loss: {l}, Accuracy: {a}, Precision: {p}, Recall: {r}, Train time: {train-start}, Eval time: {time.time() - train}')

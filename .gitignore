@@ -4,3 +4,5 @@
 *.mp3
 .idea
 __pycache__
+!demo_data/*
+demo_features.csv

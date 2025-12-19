@@ -5,8 +5,8 @@ import numpy as np
 import soundfile as sf
 
 # This file converts the data from source_folder to destination_folder
-source_path = "raw_data"
-destination_path = "processed_data"
+source_path = "../raw_data"
+destination_path = "../processed_data"
 
 def get_wavs(path):
     filenames = os.listdir(path)
@@ -63,7 +63,7 @@ def audio_data(source_folder, new_prefix, destination_folder):
 
     return audio_data_list
 
-def preprocess(modes=("train", "test"), classes=("car", "tram")):
+def preprocess(modes=("train", "validation", "test"), classes=("car", "tram")):
     for m in modes:
         for c in classes:
             source_folder = os.path.join(source_path, m, c)

@@ -2,7 +2,7 @@ import librosa
 import os
 import pandas as pd
 
-source_path = "processed_data"
+source_path = "../processed_data"
 
 
 def extract_mfcc(audio, sr, row):
@@ -73,13 +73,13 @@ def extract_all(folder_path, label):
     return rows
 
 
-def extract_features(modes=("train", "test"), classes=("car", "tram")):
+def extract_features(modes=("train", "validation", "test"), classes=("car", "tram")):
     for mode in modes:
         rows = []
         for c in classes:
             rows += extract_all(os.path.join(source_path, mode, c), label=c)
         df = pd.DataFrame(data=rows)
-        df.to_csv(f'{mode}_features_new.csv', index=False)
+        df.to_csv(f'{mode}_features.csv', index=False)
 
 
 if __name__ == "__main__":
