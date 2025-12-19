@@ -4,6 +4,8 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, BaggingClassifier, ExtraTreesClassifier, StackingClassifier, VotingClassifier
 from sklearn.metrics import precision_score, recall_score
 from CNNclassifier import CNNClassifier
+from sklearn.model_selection import train_test_split
+
 
 train_features = "train_features.csv"
 test_features = "test_features_new.csv"
@@ -32,6 +34,11 @@ def classify(classes=("car", "tram")):
     train_lb, train_ft = read_features(train_features, cls_coding)
     test_lb, test_ft = read_features(test_features, cls_coding)
 
+    # Validatio split
+    train_ft, val_ft, train_lb, val_lb = train_test_split(
+        train_ft, train_lb, test_size=0.2, random_state=42, stratify=train_lb
+    )
+
     # Define classifiers
     single_classifiers = [("Random Forest", RandomForestClassifier()), ("AdaBoost", AdaBoostClassifier()),
                           ("Bagging", BaggingClassifier()), ("Extra Trees", ExtraTreesClassifier())]
@@ -43,33 +50,42 @@ def classify(classes=("car", "tram")):
     stats = {name: {'accuracies': [], 'precisions': [], 'recalls': [], 'train_times': [], 'test_times': []} for name, _
              in classifiers}
 
-    # Train and evaluate each classifier a couple of times
-    for i in range(100):
-        print("Train-test-cycle", i + 1)
-        for name, classifier in classifiers:
-            # print("Training", name)
-            start = time.time()
-            classifier.fit(train_ft, train_lb)
-            train = time.time()
-            stats[name]['train_times'].append(train - start)
+    # Train and evaluate each classifier
+    for name, classifier in classifiers:
+        start = time.time()
+        classifier.fit(train_ft, train_lb)
+        train_time = time.time() - start
+        stats[name]['train_times'].append(train_time)
 
-            # print("Testing", name)
-            stats[name]['accuracies'].append(classifier.score(test_ft, test_lb))
-            stats[name]['precisions'].append(precision_score(classifier.predict(test_ft), test_lb))
-            stats[name]['recalls'].append(recall_score(classifier.predict(test_ft), test_lb))
-            stats[name]['test_times'].append(time.time() - train)
-            # print("  finished...")
-            # print()
+        start = time.time()
+        preds = classifier.predict(val_ft)
+        test_time = time.time() - start
+
+        stats[name]['accuracies'].append(classifier.score(val_ft, val_lb))
+        stats[name]['precisions'].append(precision_score(val_lb, preds))
+        stats[name]['recalls'].append(recall_score(val_lb, preds))
+        stats[name]['test_times'].append(test_time)
     print()
 
+    print("\nValidation results:\n")
+    for name in stats:
+        print(f"{name}:")
+        print(f"  accuracy:  {np.average(stats[name]['accuracies']) * 100:.1f} %")
+        print(f"  precision: {np.average(stats[name]['precisions']) * 100:.1f} %")
+        print(f"  recall:    {np.average(stats[name]['recalls']) * 100:.1f} %")
+        print()
+
     # Print results
-    for i, (name, _) in enumerate(classifiers):
-        print(f'{name}:')
-        print(f'  accuracy:    {np.average(stats[name]["accuracies"]) * 100:.1f} %')
-        print(f'  precision:   {np.average(stats[name]["precisions"]) * 100:.1f} %')
-        print(f'  recall:      {np.average(stats[name]["recalls"]) * 100:.1f} %')
-        print(f'  train time: {np.average(stats[name]["train_times"]) * 1000:4.0f} ms')
-        print(f'  test time:   {np.average(stats[name]["test_times"]) * 1000:3.0f} ms')
+    print("Final evaluation on test set:\n")
+
+    for name, classifier in classifiers:
+        classifier.fit(train_ft, train_lb)  # train once on full training data
+        preds = classifier.predict(test_ft)
+
+        print(f"{name}:")
+        print(f"  accuracy:  {classifier.score(test_ft, test_lb) * 100:.1f} %")
+        print(f"  precision: {precision_score(test_lb, preds) * 100:.1f} %")
+        print(f"  recall:    {recall_score(test_lb, preds) * 100:.1f} %")
         print()
 """
     ## CNN classifier for comparison (requires some environment setup (check readme))
